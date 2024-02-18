@@ -1,6 +1,7 @@
 .ContactList__item {
   display: flex;
-  justify-content: space-between;
+  gap: 40px;
+  align-content: center;
   align-items: center;
   border-bottom: 1px solid #ddd;
   padding: 10px;
