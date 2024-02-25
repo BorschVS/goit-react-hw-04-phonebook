@@ -1,21 +1,34 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { nanoid } from 'nanoid';
 import ContactForm from './ContactForm';
 import Filter from './Filter';
 import ContactList from './ContactList';
 
+const LS_KEY = 'contacts';
+const initialContacts = JSON.parse(localStorage.getItem(LS_KEY));
+
 export default function App() {
-  const [contacts, setContacts] = useState([]);
-  const [filteredContacts, setFilteredContacts] = useState([]);
+  const [contacts, setContacts] = useState(initialContacts ?? []);
   const [filter, setFilter] = useState('');
 
   useEffect(() => {
-    setFilter(filter);
-    const filteredContacts = contacts.filter(contact => {
-      return contact.name.toLowerCase().includes(filter.toLowerCase());
-    });
-    setFilteredContacts(filteredContacts);
-  }, [filter, contacts]);
+    const savedContacts = localStorage.getItem(LS_KEY);
+    const parsedContacts = JSON.parse(savedContacts);
+    if (parsedContacts) setContacts(parsedContacts);
+  }, []);
+
+  useEffect(() => {
+    const savedContacts = JSON.stringify(contacts);
+    localStorage.setItem(LS_KEY, savedContacts);
+  }, [contacts]);
+
+  const filteredContacts = useMemo(
+    () =>
+      contacts.filter(contact =>
+        contact.name.toLowerCase().includes(filter.toLowerCase())
+      ),
+    [contacts, filter]
+  );
 
   function addContact({ name, number }) {
     const newContact = {
@@ -45,7 +58,7 @@ export default function App() {
       <Filter value={filter} onChange={e => setFilter(e.target.value)} />
       {
         <ContactList
-          contacts={filter.length > 0 ? filteredContacts : contacts}
+          contacts={filteredContacts}
           deleteContact={deleteContact}
         />
       }
